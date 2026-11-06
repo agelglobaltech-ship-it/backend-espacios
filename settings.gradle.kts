@@ -23,5 +23,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "encuentra-tu-espacio-backend"
-include(":app")
 include(":backend")

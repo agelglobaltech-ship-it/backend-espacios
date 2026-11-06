@@ -7,18 +7,24 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Space(
     val id: Int? = null,
-    val nombre: String,
     val idEdificio: Int,
+    val codigo: String,
+    val nombre: String,
+    val planta: Int,
+    val capacidad: Int,
     val tipo: String,
-    val capacidad: Int
+    val estado: String
 )
 
 object Spaces : Table("espacios") {
     val id = integer("id_espacio").autoIncrement()
-    val nombre = varchar("nombre", 100)
     val idEdificio = integer("id_edificio")
-    val tipo = varchar("tipo", 50)
+    val codigo = varchar("codigo", 50)
+    val nombre = varchar("nombre", 100)
+    val planta = integer("planta")
     val capacidad = integer("capacidad")
+    val tipo = varchar("tipo", 50)
+    val estado = varchar("estado", 50)
 
     override val primaryKey = PrimaryKey(id)
 }
@@ -28,20 +34,26 @@ class SpaceService {
         Spaces.selectAll().map {
             Space(
                 id = it[Spaces.id],
-                nombre = it[Spaces.nombre],
                 idEdificio = it[Spaces.idEdificio],
+                codigo = it[Spaces.codigo],
+                nombre = it[Spaces.nombre],
+                planta = it[Spaces.planta],
+                capacidad = it[Spaces.capacidad],
                 tipo = it[Spaces.tipo],
-                capacidad = it[Spaces.capacidad]
+                estado = it[Spaces.estado]
             )
         }
     }
 
     suspend fun create(space: Space): Int = transaction {
         Spaces.insert {
-            it[nombre] = space.nombre
             it[idEdificio] = space.idEdificio
-            it[tipo] = space.tipo
+            it[codigo] = space.codigo
+            it[nombre] = space.nombre
+            it[planta] = space.planta
             it[capacidad] = space.capacidad
+            it[tipo] = space.tipo
+            it[estado] = space.estado
         } get Spaces.id
     }
 }

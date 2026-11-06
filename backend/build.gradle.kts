@@ -30,3 +30,12 @@ dependencies {
     // Logs
     implementation("ch.qos.logback:logback-classic:1.4.14")
 }
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "com.upt.espacios.ApplicationKt"
+    }
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

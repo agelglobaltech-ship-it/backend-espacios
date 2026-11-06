@@ -8,51 +8,89 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.http.*
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-
-        DatabaseFactory.init()
-
-        install(ContentNegotiation) {
-            json()
+    try {
+        println("🚀 Iniciando servidor Ktor backend...")
+        
+        try {
+            DatabaseFactory.init()
+        } catch (e: Exception) {
+            println("❌ Error crítico conectando a BD al iniciar: ${e.message}")
+            e.printStackTrace()
+            throw e
         }
 
-        val userService = UserService()
-        val spaceService = SpaceService()
+        embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
 
-        routing {
-            get("/") {
-                call.respondText("Servidor Ktor en funcionamiento")
+            install(ContentNegotiation) {
+                json()
             }
 
-            // Rutas de Usuarios
-            route("/api/usuarios") {
-                get {
-                    val users = userService.getAll()
-                    call.respond(users)
+            val userService = UserService()
+            val spaceService = SpaceService()
+
+            routing {
+                get("/") {
+                    call.respondText("Servidor Ktor en funcionamiento 🚀")
                 }
 
-                post {
-                    val user = call.receive<User>()
-                    val newId = userService.create(user)
-                    call.respond(mapOf("status" to "success", "id" to newId))
+                // Rutas de Usuarios
+                route("/api/usuarios") {
+                    get {
+                        try {
+                            val users = userService.getAll()
+                            call.respond(users)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "Error desconocido"}"
+                            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to errorMsg))
+                        }
+                    }
+
+                    post {
+                        try {
+                            val user = call.receive<User>()
+                            val newId = userService.create(user)
+                            call.respond(mapOf("status" to "success", "id" to newId))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "Error desconocido"}"
+                            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to errorMsg))
+                        }
+                    }
+                }
+
+                // Rutas de Espacios
+                route("/api/espacios") {
+                    get {
+                        try {
+                            val spaces = spaceService.getAll()
+                            call.respond(spaces)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "Error desconocido"}"
+                            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to errorMsg))
+                        }
+                    }
+
+                    post {
+                        try {
+                            val space = call.receive<Space>()
+                            val newId = spaceService.create(space)
+                            call.respond(mapOf("status" to "success", "id" to newId))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            val errorMsg = "${e.javaClass.simpleName}: ${e.message ?: "Error desconocido"}"
+                            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to errorMsg))
+                        }
+                    }
                 }
             }
-
-            // Rutas de Espacios
-            route("/api/espacios") {
-                get {
-                    val spaces = spaceService.getAll()
-                    call.respond(spaces)
-                }
-
-                post {
-                    val space = call.receive<Space>()
-                    val newId = spaceService.create(space)
-                    call.respond(mapOf("status" to "success", "id" to newId))
-                }
-            }
-        }
-    }.start(wait = true)
+        }.start(wait = true)
+    } catch (e: Throwable) {
+        System.err.println("❌ ERROR FATAL EN MAIN:")
+        e.printStackTrace()
+    }
 }
