@@ -1,4 +1,5 @@
 package com.upt.espacios
+//Examen dafne demostrar commit y push mediante SSH
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                                 when (currentRoute) {
                                     Screen.Inicio.route -> DashboardScreen(
                                         onReserveClick = { espacio ->
-                                            selectedRoomForReservation = espacio.title
+                                            selectedRoomForReservation = espacio.nombre
                                             currentRoute = "reservar"
                                         }
                                     )
